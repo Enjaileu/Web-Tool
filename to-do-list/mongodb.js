@@ -9,11 +9,13 @@ mongoose.connect('mongodb://127.0.0.1:27017/to-do-list',{
 const User = mongoose.model('User',{
     name:{
         type : String,
-        required : true
+        required : true,
+        trim : true
     },
     mail : {
         type : String,
         required : true,
+        trim : true,
         validate(value){
             if(!validator.isEmail(value)){
                 throw new Error('Email adress is not valid')
