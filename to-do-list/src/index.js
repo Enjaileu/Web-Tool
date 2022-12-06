@@ -18,6 +18,14 @@ app.post('/users', (req, res)=>{
     })
 })
 
+app.get('/users', (req, res)=>{
+    User.find({}).then((users)=>{
+        res.status(200).send(users)
+    }).catch((error)=>{
+        res.status(500).send(error) // 500 = status error
+    })
+})
+
 // TASK
 app.post('/tasks', (req, res)=>{
     const task =  Task(req.body)
@@ -25,6 +33,14 @@ app.post('/tasks', (req, res)=>{
         res.status(202).send(task)
     }).catch((error)=>{
         res.status(400).send(error)
+    })
+})
+
+app.get('/tasks', (req, res)=>{
+    Task.find({}).then((tasks)=>{
+        res.status(200).send(tasks)
+    }).catch((error)=>{
+        res.status(500).send(error) // 500 = status error
     })
 })
 
