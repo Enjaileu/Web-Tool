@@ -16,7 +16,14 @@ router.post('/tasks', async (req, res)=>{
 
 router.get('/tasks', async (req, res)=>{
     try{
-        const tasks = await Task.find({})
+        const completedQuery = req.query.isCompleted
+        console.log(completedQuery)
+        let tasks = []
+        if(completedQuery){
+            tasks = await Task.find({isComplete : completedQuery})
+        }else{
+            tasks = await Task.find({})
+        }
         res.status(200).send(tasks)
     }catch(error){
         res.status(500).send(error)
