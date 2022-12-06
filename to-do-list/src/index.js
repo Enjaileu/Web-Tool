@@ -1,39 +1,21 @@
-const mongoose = require('mongoose')
-const validator = require('validator')
+const express = require('express')
+require('../db/mongoose')
+const User = require('./model/user')
 
-mongoose.connect('mongodb://127.0.0.1:27017/to-do-list',{
-    useNewUrlParser:true,
-    useUnifiedTopology:true
+const app = express();
+const port = process.envPORT || 3000
+
+app.use(express.json())
+
+app.post('/users', (req, res)=>{
+    const user =  User(req.body)
+    user.save().then(()=>{
+        res.status(202).send(user)
+    }).catch((error)=>{
+        res.status(400).send(error)
+    })
 })
 
-const User = mongoose.model('User',{
-    name:{
-        type : String,
-        required : true
-    },
-    mail : {
-        type : String,
-        required : true,
-        validate(value){
-            if(!validator.isEmail(value)){
-                throw new Error('Email adress is not valid')
-            }
-        }
-    },
-    passeword : {
-        type : String,
-        required : true
-    }
-})
-
-const user = User({
-    name : "Angèle",
-    mail : "a.ngele@mail.fr",
-    passeword : "motdepasse"
-})
-
-user.save().then(()=>{
-    console.log(user)
-}).catch((error)=>{
-    console.log(error)
+app.listen(port, ()=>{
+    console.log('Server is up on port ' + port)
 })
