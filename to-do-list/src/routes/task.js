@@ -1,13 +1,18 @@
 const express = require('express')
 const router = new express.Router()
 const Task = require('../model/task')
+const Assigned = require('../model/assigned')
 
 
-// TASK
-router.post('/tasks', async (req, res)=>{
+// Create a task assigned to the id user
+router.post('/tasks/:id', async (req, res)=>{
     const task =  Task(req.body)
     try{
+        // save task
         await task.save()
+        t_id = task._id
+        const assigned = Assigned({user:req.params.id, task:t_id})
+        await assigned.save()
         res.status(202).send(task)
     }catch(error){
         res.status(400).send(error)
@@ -17,7 +22,6 @@ router.post('/tasks', async (req, res)=>{
 router.get('/tasks', async (req, res)=>{
     try{
         const completedQuery = req.query.isCompleted
-        console.log(completedQuery)
         let tasks = []
         if(completedQuery){
             tasks = await Task.find({isComplete : completedQuery})

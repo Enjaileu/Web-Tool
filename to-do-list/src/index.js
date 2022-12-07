@@ -5,29 +5,25 @@ const port = process.envPORT || 3000
 
 app.use(express.json())
 
+// EXPLAIN APP
+/*
+- Users can be created and deleted
+- A User can create a Task
+- A User can create a Subtask to a Task
+- A User can assigned another User to a Task
+- A User can get the Tasks list it is assigned to
+- A User can get the Subtasks list of a Task it is assigned to
+- A User can set as complete a Task it is assign to if this task has no Subtask
+- A User can set as complete a Subtask of a Task it is assigned to
+*/
+
 // ROUTES
 const userRouter = require('./routes/user')
 app.use(userRouter)
 const taskRouter = require('./routes/task')
 app.use(taskRouter)
-
-// SCHEMA
-/*
-const Task = require('./model/task')
-const testT2U = async()=>{
-    const task = await Task.findById('638f4eef894c0debbb52f6ef')
-    await task.populate('owner')
-    console.log(task.owner)
-}
-//testT2U()
-
-const User = require('./model/user')
-const testU2T = async ()=>{
-    const user = User.findById('638f1335e82dd554f3e6632c')
-    await user.populate('tasks')
-    console.log(user.tasks)
-}
-testU2T()*/
+const subtaskRouter = require('./routes/subtask')
+app.use(subtaskRouter)
 
 // LISTEN
 app.listen(port, ()=>{
