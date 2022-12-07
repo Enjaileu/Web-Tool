@@ -24,6 +24,8 @@ const taskRouter = require('./routes/task')
 app.use(taskRouter)
 const subtaskRouter = require('./routes/subtask')
 app.use(subtaskRouter)
+const assignedRouter = require('./routes/assigned')
+app.use(assignedRouter)
 
 // LISTEN
 app.listen(port, ()=>{
