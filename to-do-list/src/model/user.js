@@ -19,7 +19,12 @@ const userSchema = new mongoose.Schema({
     },
     passeword : {
         type : String,
-        required : true
+        required : true,
+        validate(value){
+            if(value.lenght < 8){
+                throw new Error('Your passeword need to be at least 8 characters long')
+            }
+        }
     }
 }, {timestamps : true})
 
