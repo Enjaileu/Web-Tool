@@ -38,14 +38,31 @@ router.post('/subtasks/:id', async (req, res)=>{
 router.get('/subtasks', async (req, res)=>{
     try{
         const task_id = req.query.task
-        console.log(task_id)
         let subs = []
         if(task_id){
+            const task = Task.findById(task_id)
+            if(!task){
+                return res.status(404).send("Task not found")
+            }
             subs = await Subtask.find({task:task_id})
         }else{
             subs = await Subtask.find({})
         }
         res.status(202).send(subs)
+    }catch(error){
+        res.status(500).send(error)
+    }
+})
+
+// get a document by id in database "subtasks"
+// :id -> subtask id
+router.get('/subtasks/:id', async (req,res)=>{
+    try{
+        const sub = await Subtask.findById(req.params.id)
+        if(!sub){
+            return res.status(404).send("Subtask not found")
+        }
+        res.status(200).send(sub)
     }catch(error){
         res.status(500).send(error)
     }
@@ -68,7 +85,6 @@ router.delete('/subtasks/:id', async (req, res) =>{
         updateTask(task, -1)
         //send response
         res.status(202).send(sub)
-
     }catch(error){
         res.status(500).send(error)
     }
