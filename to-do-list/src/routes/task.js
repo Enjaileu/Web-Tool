@@ -10,6 +10,7 @@ router.post('/tasks/:id', async (req, res)=>{
     try{
         // save task
         await task.save()
+        // create document in database "assigneds"
         t_id = task._id
         const assigned = Assigned({user:req.params.id, task:t_id})
         await assigned.save()
@@ -19,12 +20,19 @@ router.post('/tasks/:id', async (req, res)=>{
     }
 })
 
+// get all the documents in database "tasks"
+// if query "user", we get all te tasks assigned to the user
 router.get('/tasks', async (req, res)=>{
     try{
-        const completedQuery = req.query.isCompleted
+        const user_id = req.query.user
         let tasks = []
-        if(completedQuery){
-            tasks = await Task.find({isComplete : completedQuery})
+        if(user_id){
+            const test = await Assigned.find({user : user_id})
+            for(let counter = 0; counter < test.length; counter++){
+                const assigned = test[counter]
+                await assigned.populate('task')
+                tasks[counter] = assigned.task
+            }
         }else{
             tasks = await Task.find({})
         }
@@ -34,6 +42,7 @@ router.get('/tasks', async (req, res)=>{
     }
 })
 
+// get a document by id in database "tasks"
 router.get('/tasks/:id', async(req, res)=>{
     const _id = req.params.id
     try{
@@ -47,6 +56,7 @@ router.get('/tasks/:id', async(req, res)=>{
     }
 })
 
+// modify a document by id in database "tasks"
 router.patch('/tasks/:id', async(req, res)=>{
     try{
         const task = await Task.findByIdAndUpdate(req.params.id, req.body, {new:true, runValidators:true})
@@ -59,13 +69,37 @@ router.patch('/tasks/:id', async(req, res)=>{
     }
 })
 
+// a user (id in req.body) want to be removed from a task(id in route)
+// if the User is the only one assigned to this Task : the Task is deleted and the document in database "assigneds" associated is deleted too
+// if there are other User assigned to this Task : the document associated in database "assigneds" is delete but not the Task
 router.delete('/tasks/:id', async(req,res)=>{
+    const user_id = req.body.user
+    const assigned = await Assigned.find({task:req.params.id})
     try{
-        const task = await Task.findByIdAndDelete(req.params.id)
-        if(!task){
-            return res.status(404).send("Task not found")
+        // if there are other User assigned to the Task 
+        if(assigned.length > 1){
+            // delete document in database "assigneds"
+            const task = await Assigned.findOneAndDelete({$and : [{user:user_id}, {task:req.params.id}]})
+            if(!task){
+                return res.status(404).send("Task not found")
+            }
+            return res.status(202).send(task)
         }
-        res.send(task)
+        // if the User is the only one assigned to the Task 
+        else{
+            // delete document in database "assigneds"
+            const assigned = await Assigned.findOneAndDelete({$and : [{user:user_id}, {task:req.params.id}]})
+            if(!assigned){
+                return res.status(404).send("This task is not assigned to this user")
+            }else{
+                // delete document in database "taks"
+                const task = await Task.findByIdAndDelete(req.params.id)
+                if(!task){
+                    return res.status(404).send("Task not found")
+                }
+            }
+            return res.status(202).send()
+        }
     }catch(error){
         res.status(500).send(error)
     }
