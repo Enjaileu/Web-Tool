@@ -33,15 +33,31 @@ router.post('/subtasks/:id', async (req, res)=>{
     }
 })
 
+// get all the documents in database "subtasks"
+// if query "task", get all the subtasks assigned to the task
+router.get('/subtasks', async (req, res)=>{
+    try{
+        const task_id = req.query.task
+        console.log(task_id)
+        let subs = []
+        if(task_id){
+            subs = await Subtask.find({task:task_id})
+        }else{
+            subs = await Subtask.find({})
+        }
+        res.status(202).send(subs)
+    }catch(error){
+        res.status(500).send(error)
+    }
+})
+
 // Delete a document in database "substasks"
 // :id -> substask id
 // update the task associated accordingly
 router.delete('/subtasks/:id', async (req, res) =>{
     const _id = req.params.id
-    console.log("subtask id = " + _id)
     try{
         const sub = await Subtask.findByIdAndDelete(_id)
-        console.log("sub = " + sub )
         // if substask doesn't exist
         if(!sub){
             return res.status(404).send("Subtask not found")
@@ -49,7 +65,6 @@ router.delete('/subtasks/:id', async (req, res) =>{
         // if substask exist
         // update task
         const task = await Task.findById(sub.task)
-        console.log("task = " + task)
         updateTask(task, -1)
         //send response
         res.status(202).send(sub)

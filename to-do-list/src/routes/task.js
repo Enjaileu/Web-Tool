@@ -27,9 +27,9 @@ router.get('/tasks', async (req, res)=>{
         const user_id = req.query.user
         let tasks = []
         if(user_id){
-            const test = await Assigned.find({user : user_id})
-            for(let counter = 0; counter < test.length; counter++){
-                const assigned = test[counter]
+            const assigned = await Assigned.find({user : user_id})
+            for(let counter = 0; counter < assigned.length; counter++){
+                const assigned = assigned[counter]
                 await assigned.populate('task')
                 tasks[counter] = assigned.task
             }
